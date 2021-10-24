@@ -1,0 +1,2 @@
+# WidziszMnieCoin
+*****, widzisz mnie?
