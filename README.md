@@ -1,2 +1,2 @@
 # WidziszMnieCoin
-*****, widzisz mnie?
+Widzisz mnie?
