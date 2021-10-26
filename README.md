@@ -1,7 +1,7 @@
 # WidziszMnieCoin
 Widzisz mnie?
 
-## O projakcie
+## O projekcie
 Projekt ma na celu naukę zagadnień związanych z kryptografią oraz technologią blockchain oraz zagadnieniem kryprowalut. Założeniem jest stworzenie własnej prostej kryptowaluty. Jest tworzony w ramach kursu *Kryptografia stosowana* na kierunku *Informatyka stosowana* na studiach 2 stopnia na *Politechnice Warszawskiej*.
 
 ## Uruchomienie
