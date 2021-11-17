@@ -9,3 +9,7 @@ Należy uruchomić plik main.py np. poleceniem "python main.py" lub "python3 mai
 
 ## Jak korzystać?
 Korzystanie z programu odbywa się poprzez wpisanie w konsoli cyfry odpowiadającej odpowiedniemu poleceniu. Polecenia wyświetlają się w konsoli po uruchomieniu programu.
+
+## Autorzy
+
+Rafał Pachnia, Adrian Gabor
