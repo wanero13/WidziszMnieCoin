@@ -1,39 +1,35 @@
 import blockchainManager
 
-#Stworzenie blockchainu
-Blockchain = blockchainManager.blockchainManager()
-
-#Utworzenie użytkowników początkowych
+# Utworzenie użytkowników początkowych
 User1 = blockchainManager.Client('Adrian')
 User2 = blockchainManager.Client('Maria')
 User3 = blockchainManager.Client('Jan')
 User4 = blockchainManager.Client('Karol')
-Blockchain.addUser(User1)
-Blockchain.addUser(User2)
-Blockchain.addUser(User3)
-Blockchain.addUser(User4)
-# print(Blockchain.userList)
 
+userList = []
+userList.append(User1)
+userList.append(User2)
+userList.append(User3)
+userList.append(User4)
 
-#Generowanie coinów
-Blockchain.generateCoins()
-Blockchain.addBlock('proof')
-# print(Blockchain.chain)
-
-
+# Stworzenie blockchainu
+Blockchain = blockchainManager.blockchainManager(userList)
 
 while True:
-    print("1 - Dodaj blok")
-    print("2 - Sprawdź spójność")
-    print("3 - Lista użytkowników")
-    print("4 - Wybierz użytkownika")
-    print("0 - Zakończ")
+    print("""
+1 - Dodaj blok
+2 - Sprawdź spójność
+3 - Lista użytkowników
+4 - Wybierz użytkownika
+0 - Zakończ
+""")
     option = input()
     if option == '1':
         print("Podaj zawartość")
         content = input()
         Blockchain.addBlock(content)
     elif option == '2':
+        print(Blockchain.chain)
         Blockchain.checkValid()
     elif option == '3':
         print('Lista użytkoniwków: ')
@@ -43,6 +39,7 @@ while True:
     elif option == '4':
         print('Podaj ID użytkownika (0-3): ')
 # Menu użytkownika
+
         userFlag = True
         selectedUser = input()
         user = Blockchain.userList[int(selectedUser)]
@@ -61,7 +58,7 @@ while True:
                 recipient = Blockchain.userList[int(selectedRecipient)]
                 print('Podaj CoinID')
                 selectedCoin = input()
-                Blockchain.new_transaction(user.identity, recipient.identity, selectedCoin)
+                Blockchain.new_transaction(user.identity, recipient.identity, int(selectedCoin))
             elif userOption == '0':
                 userFlag = False
             else:
@@ -70,5 +67,3 @@ while True:
         exit(1)
     else:
         print("Wybierz poprawną opcję")
-
-

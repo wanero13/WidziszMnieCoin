@@ -13,32 +13,35 @@ from Crypto.Signature import PKCS1_v1_5
 
 
 class Client:
-   def __init__(self, name):
-      random = Crypto.Random.new().read
-      self._private_key = RSA.generate(1024, random)
-      self._public_key = self._private_key.publickey()
-      self._signer = PKCS1_v1_5.new(self._private_key)
-      self.name = name
-   @property
-   def identity(self):
-    return binascii.hexlify(self._public_key.exportKey(format='DER')).decode('ascii')
+    def __init__(self, name):
+        random = Crypto.Random.new().read
+        self._private_key = RSA.generate(1024, random)
+        self._public_key = self._private_key.publickey()
+        self._signer = PKCS1_v1_5.new(self._private_key)
+        self.name = name
 
+    @property
+    def identity(self):
+        return binascii.hexlify(self._public_key.exportKey(format='DER')).decode('ascii')
 
 
 class blockchainManager:
 
-    def __init__(self):
+    def __init__(self, userList):
         self.chain = []
         self.pending_transactions = []
-        self.userList = []
+        self.userList = userList
+        self.generateCoins()
+
         genessisBlock = {
-            'id': len(self.chain)+1,
+            'id': len(self.chain) + 1,
             'prevHash': 0,
             'content': 'content',
-            'transactions': '',
-            'proof' : 'proof',
+            'transactions': self.pending_transactions,
+            'proof': 'proof',
         }
         self.chain.append(genessisBlock)
+        self.pending_transactions = []
         toCode = json.dumps(genessisBlock, sort_keys=1).encode()
         self.sumHash = hashlib.sha3_512(toCode).hexdigest()
         self.coinCounter = 4
@@ -62,18 +65,17 @@ class blockchainManager:
             else:
                 print('Spójność zachowana!'+'\n')
 
-
     def addBlock(self, proof):
         block = {
-            'id': len(self.chain)+1,
+            'id': len(self.chain) + 1,
             'prevHash': self.sumHash,
             'timetamp': strftime("%d %b %Y %H:%M:%S", gmtime()),
             'transactions': self.pending_transactions,
-            'proof' : proof,
+            'proof': proof,
         }
         self.pending_transactions = []
         self.chain.append(block)
-        toCode = json.dumps(block,sort_keys=1).encode()
+        toCode = json.dumps(block, sort_keys=1).encode()
         self.sumHash = hashlib.sha3_512(toCode).hexdigest()
         print(self.chain)
 
@@ -121,37 +123,30 @@ class blockchainManager:
         owned = []
         for block in self.chain:
             for transaction in block['transactions']:
-                if transaction['recipient']==userID:
+                if transaction['recipient'] == userID:
                     coinID = int(transaction['coinID'])
                     if coinID not in owned:
                         owned.append(coinID)
-                if transaction['sender']==userID:
+                if transaction['sender'] == userID:
                     coinID = int(transaction['coinID'])
                     if coinID in owned:
                         owned.remove(coinID)
         print('Posiadane Coiny ' + str(owned)+ '\n')
         return owned
-        
-
 
     def checkTransaction(self, transaction):
         coinID = int(transaction['coinID'])
         owned = self.checkWallet(transaction['sender'])
         if coinID in owned:
-            if len(self.pending_transactions) == 0:
-                print("Transakcja zgodna")
-                return True
-            else:
-                for i in range(len(self.pending_transactions)):
-                    if coinID == int(self.pending_transactions[i]['coinID']):
-                        print('Transakcja niegodna')
-                        return False
-                print('Transakcja zgodna')
-                return True
+            for ordered in self.pending_transactions:
+                if ordered["coinID"] == coinID:
+                    print('Transakcja z tym coinem została już zlecona do realizacji')
+                    return False
+            print('Transakcja zgodna')
+            return True
         else:
             print('Transakcja niezgodna')
             return False
-
 
     def addUser(self, user):
         self.userList.append(user)
