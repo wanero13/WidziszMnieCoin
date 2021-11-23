@@ -60,7 +60,7 @@ class blockchainManager:
             if lastBlockHash != self.sumHash:
                 print('Wykryto brak spójności w bloku: ' + lastBlock)
             else:
-                print('Spójność zachowana!')
+                print('Spójność zachowana!'+'\n')
 
 
     def addBlock(self, proof):
@@ -129,7 +129,7 @@ class blockchainManager:
                     coinID = int(transaction['coinID'])
                     if coinID in owned:
                         owned.remove(coinID)
-        print('Posiadane Coiny' + str(owned)+ '\n')
+        print('Posiadane Coiny ' + str(owned)+ '\n')
         return owned
         
 

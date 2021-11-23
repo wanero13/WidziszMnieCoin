@@ -12,13 +12,13 @@ Blockchain.addUser(User1)
 Blockchain.addUser(User2)
 Blockchain.addUser(User3)
 Blockchain.addUser(User4)
-print(Blockchain.userList)
+# print(Blockchain.userList)
 
 
 #Generowanie coinów
 Blockchain.generateCoins()
 Blockchain.addBlock('proof')
-print(Blockchain.chain)
+# print(Blockchain.chain)
 
 
 
@@ -36,10 +36,12 @@ while True:
     elif option == '2':
         Blockchain.checkValid()
     elif option == '3':
+        print('Lista użytkoniwków: ')
         for user in Blockchain.userList:
             print(user.name + ', ', end='')
         print()
     elif option == '4':
+        print('Podaj ID użytkownika (0-3): ')
 # Menu użytkownika
         userFlag = True
         selectedUser = input()
@@ -53,9 +55,8 @@ while True:
             userOption = input()
             if userOption == '1':
                 Blockchain.checkWallet(user.identity)
-                print(Blockchain.pending_transactions)
             elif userOption == '2':
-                print('Podaj odbiorcę')
+                print('Podaj ID odbiorcy')
                 selectedRecipient = input()
                 recipient = Blockchain.userList[int(selectedRecipient)]
                 print('Podaj CoinID')
