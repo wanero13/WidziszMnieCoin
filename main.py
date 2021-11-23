@@ -1,7 +1,9 @@
 import blockchainManager
 
+#Stworzenie blockchainu
 Blockchain = blockchainManager.blockchainManager()
 
+#Utworzenie użytkowników początkowych
 User1 = blockchainManager.Client('Adrian')
 User2 = blockchainManager.Client('Maria')
 User3 = blockchainManager.Client('Jan')
@@ -12,6 +14,8 @@ Blockchain.addUser(User3)
 Blockchain.addUser(User4)
 print(Blockchain.userList)
 
+
+#Generowanie coinów
 Blockchain.generateCoins()
 Blockchain.addBlock('proof')
 print(Blockchain.chain)
@@ -36,6 +40,7 @@ while True:
             print(user.name + ', ', end='')
         print()
     elif option == '4':
+# Menu użytkownika
         userFlag = True
         selectedUser = input()
         user = Blockchain.userList[int(selectedUser)]

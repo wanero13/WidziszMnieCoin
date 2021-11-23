@@ -116,11 +116,14 @@ class blockchainManager:
         self.pending_transactions.append(coin2)
         self.pending_transactions.append(coin3)
         self.pending_transactions.append(coin4)
+
     def checkWallet(self, userID):
         owned = []
         for block in self.chain:
             print(block['transactions'])
+
     def checkTransaction(self, transaction):
+        
         return True
     def addUser(self, user):
         self.userList.append(user)
