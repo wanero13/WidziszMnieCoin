@@ -94,22 +94,22 @@ class blockchainManager:
     def generateCoins(self):
         coin1 = {
             'sender': 'genessis',
-            'recipient': self.userList[1].identity,
+            'recipient': self.userList[0].identity,
             'coinID': self.coinCounter,
         }
         coin2 = {
             'sender': 'genessis',
-            'recipient': self.userList[1].identity,
+            'recipient': self.userList[0].identity,
             'coinID': 1,
         }
         coin3 = {
             'sender': 'genessis',
-            'recipient': self.userList[3].identity,
+            'recipient': self.userList[2].identity,
             'coinID': 2
         }
         coin4 = {
             'sender': 'genessis',
-            'recipient': self.userList[3].identity,
+            'recipient': self.userList[2].identity,
             'coinID': 3,
         }
         self.pending_transactions.append(coin1)
@@ -120,10 +120,21 @@ class blockchainManager:
     def checkWallet(self, userID):
         owned = []
         for block in self.chain:
-            print(block['transactions'])
+            for transaction in block['transactions']:
+                if transaction['recipient']==userID:
+                    coinID = int(transaction['coinID'])
+                    if coinID not in owned:
+                        owned.append(coinID)
+                if transaction['sender']==userID:
+                    coinID = int(transaction['coinID'])
+                    if coinID in owned:
+                        owned.remove(coinID)
+        print(owned)
+        return
+
 
     def checkTransaction(self, transaction):
-        
+
         return True
     def addUser(self, user):
         self.userList.append(user)
