@@ -1,33 +1,31 @@
 import blockchainManager
 
-#Stworzenie blockchainu
-Blockchain = blockchainManager.blockchainManager()
+
 
 #Utworzenie użytkowników początkowych
 User1 = blockchainManager.Client('Adrian')
 User2 = blockchainManager.Client('Maria')
 User3 = blockchainManager.Client('Jan')
 User4 = blockchainManager.Client('Karol')
-Blockchain.addUser(User1)
-Blockchain.addUser(User2)
-Blockchain.addUser(User3)
-Blockchain.addUser(User4)
-print(Blockchain.userList)
+userList=[]
+userList.append(User1)
+userList.append(User2)
+userList.append(User3)
+userList.append(User4)
 
-
-#Generowanie coinów
-Blockchain.generateCoins()
-Blockchain.addBlock('proof')
-print(Blockchain.chain)
+#Stworzenie blockchainu
+Blockchain = blockchainManager.blockchainManager(userList)
 
 
 
 while True:
-    print("1 - Dodaj blok")
-    print("2 - Sprawdź spójność")
-    print("3 - Lista użytkowników")
-    print("4 - Wybierz użytkownika")
-    print("0 - Zakończ")
+    print("""
+1 - Dodaj blok
+2 - Sprawdź spójność
+3 - Lista użytkowników
+4 - Wybierz użytkownika
+0 - Zakończ
+""")
     option = input()
     if option == '1':
         print("Podaj zawartość")

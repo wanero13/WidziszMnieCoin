@@ -27,15 +27,17 @@ class Client:
 
 class blockchainManager:
 
-    def __init__(self):
+    def __init__(self, userList):
         self.chain = []
         self.pending_transactions = []
-        self.userList = []
+        self.userList = userList
+        self.generateCoins()
+
         genessisBlock = {
             'id': len(self.chain)+1,
             'prevHash': 0,
             'content': 'content',
-            'transactions': '',
+            'transactions': self.pending_transactions,
             'proof' : 'proof',
         }
         self.chain.append(genessisBlock)
