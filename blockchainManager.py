@@ -30,16 +30,18 @@ class blockchainManager:
     def __init__(self):
         self.chain = []
         self.pending_transactions = []
-        self.coinList = [{'coinID': 0, 'amount':1},{'coinID': 1, 'amount':1},{'coinID': 2, 'amount':1},{'coinID': 3, 'amount':1}]
+        self.userList = []
         genessisBlock = {
             'id': len(self.chain)+1,
             'prevHash': 0,
             'content': 'content',
-            'generatedCoins': self.coinList
+            'transactions': '',
+            'proof' : 'proof',
         }
         self.chain.append(genessisBlock)
         toCode = json.dumps(genessisBlock, sort_keys=1).encode()
         self.sumHash = hashlib.sha3_512(toCode).hexdigest()
+        self.coinCounter = 4
 
     def checkValid(self):
         prevHash = 0
@@ -89,7 +91,36 @@ class blockchainManager:
             self.pending_transactions.append(transaction)
         return self.last_block['id'] + 1
 
+    def generateCoins(self):
+        coin1 = {
+            'sender': 'genessis',
+            'recipient': self.userList[1].identity,
+            'coinID': self.coinCounter,
+        }
+        coin2 = {
+            'sender': 'genessis',
+            'recipient': self.userList[1].identity,
+            'coinID': 1,
+        }
+        coin3 = {
+            'sender': 'genessis',
+            'recipient': self.userList[3].identity,
+            'coinID': 2
+        }
+        coin4 = {
+            'sender': 'genessis',
+            'recipient': self.userList[3].identity,
+            'coinID': 3,
+        }
+        self.pending_transactions.append(coin1)
+        self.pending_transactions.append(coin2)
+        self.pending_transactions.append(coin3)
+        self.pending_transactions.append(coin4)
     def checkWallet(self, userID):
-        return True
+        owned = []
+        for block in self.chain:
+            print(block['transactions'])
     def checkTransaction(self, transaction):
         return True
+    def addUser(self, user):
+        self.userList.append(user)
