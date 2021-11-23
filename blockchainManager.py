@@ -1,7 +1,6 @@
 import json
 import hashlib
 from time import *
-
 import binascii
 from matplotlib import pylab
 import pylab as pl
@@ -14,15 +13,16 @@ from Crypto.Signature import PKCS1_v1_5
 
 
 class Client:
-   def __init__(self):
+   def __init__(self, name):
       random = Crypto.Random.new().read
       self._private_key = RSA.generate(1024, random)
       self._public_key = self._private_key.publickey()
       self._signer = PKCS1_v1_5.new(self._private_key)
-
+      self.name = name
    @property
    def identity(self):
     return binascii.hexlify(self._public_key.exportKey(format='DER')).decode('ascii')
+
 
 
 class blockchainManager:
@@ -30,11 +30,12 @@ class blockchainManager:
     def __init__(self):
         self.chain = []
         self.pending_transactions = []
-
+        self.coinList = [{'coinID': 0, 'amount':1},{'coinID': 1, 'amount':1},{'coinID': 2, 'amount':1},{'coinID': 3, 'amount':1}]
         genessisBlock = {
             'id': len(self.chain)+1,
             'prevHash': 0,
             'content': 'content',
+            'generatedCoins': self.coinList
         }
         self.chain.append(genessisBlock)
         toCode = json.dumps(genessisBlock, sort_keys=1).encode()
@@ -78,12 +79,17 @@ class blockchainManager:
     def last_block(self):
         return self.chain[-1]
 
-    def new_transaction(self, sender, recipient, amount):
+    def new_transaction(self, sender, recipient, coinID):
         transaction = {
             'sender': sender,
             'recipient': recipient,
-            'amount': amount,
+            'amocoinID': coinID,
         }
-        self.pending_transactions.append(transaction)
+        if self.checkTransaction(transaction):
+            self.pending_transactions.append(transaction)
         return self.last_block['id'] + 1
 
+    def checkWallet(self, userID):
+        return True
+    def checkTransaction(self, transaction):
+        return True
