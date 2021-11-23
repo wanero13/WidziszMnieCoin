@@ -69,3 +69,5 @@ while True:
         exit(1)
     else:
         print("Wybierz poprawną opcję")
+
+

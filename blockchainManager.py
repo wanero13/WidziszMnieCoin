@@ -138,8 +138,16 @@ class blockchainManager:
         coinID = int(transaction['coinID'])
         owned = self.checkWallet(transaction['sender'])
         if coinID in owned:
-            print('Transakcja zgodna')
-            return True
+            if len(self.pending_transactions) == 0:
+                print("Transakcja zgodna")
+                return True
+            else:
+                for i in range(len(self.pending_transactions)):
+                    if coinID == int(self.pending_transactions[i]['coinID']):
+                        print('Transakcja niegodna')
+                        return False
+                print('Transakcja zgodna')
+                return True
         else:
             print('Transakcja niezgodna')
             return False
