@@ -57,12 +57,12 @@ while True:
                 print('Podaj odbiorcę')
                 selectedRecipient = input()
                 recipient = Blockchain.userList[int(selectedRecipient)]
+                print('Podaj CoinID')
                 selectedCoin = input()
-                Blockchain.new_transaction(user.identity, recipient, selectedCoin)
+                Blockchain.new_transaction(user.identity, recipient.identity, selectedCoin)
             elif userOption == '0':
                 userFlag = False
     elif option == '0':
         exit(1)
     else:
         print("Wybierz 1 lub 2")
-
