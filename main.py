@@ -53,6 +53,7 @@ while True:
             userOption = input()
             if userOption == '1':
                 Blockchain.checkWallet(user.identity)
+                print(Blockchain.pending_transactions)
             elif userOption == '2':
                 print('Podaj odbiorcę')
                 selectedRecipient = input()
@@ -62,7 +63,9 @@ while True:
                 Blockchain.new_transaction(user.identity, recipient.identity, selectedCoin)
             elif userOption == '0':
                 userFlag = False
+            else:
+                print("Wybierz poprawną opcję")
     elif option == '0':
         exit(1)
     else:
-        print("Wybierz 1 lub 2")
+        print("Wybierz poprawną opcję")

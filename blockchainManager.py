@@ -95,7 +95,7 @@ class blockchainManager:
         coin1 = {
             'sender': 'genessis',
             'recipient': self.userList[0].identity,
-            'coinID': self.coinCounter,
+            'coinID': 0,
         }
         coin2 = {
             'sender': 'genessis',
