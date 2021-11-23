@@ -16,8 +16,6 @@ userList.append(User4)
 #Stworzenie blockchainu
 Blockchain = blockchainManager.blockchainManager(userList)
 
-
-
 while True:
     print("""
 1 - Dodaj blok
@@ -32,6 +30,7 @@ while True:
         content = input()
         Blockchain.addBlock(content)
     elif option == '2':
+        print(Blockchain.chain)
         Blockchain.checkValid()
     elif option == '3':
         for user in Blockchain.userList:
@@ -58,7 +57,7 @@ while True:
                 recipient = Blockchain.userList[int(selectedRecipient)]
                 print('Podaj CoinID')
                 selectedCoin = input()
-                Blockchain.new_transaction(user.identity, recipient.identity, selectedCoin)
+                Blockchain.new_transaction(user.identity, recipient.identity, int(selectedCoin))
             elif userOption == '0':
                 userFlag = False
             else:
