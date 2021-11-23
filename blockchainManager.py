@@ -131,12 +131,21 @@ class blockchainManager:
                     coinID = int(transaction['coinID'])
                     if coinID in owned:
                         owned.remove(coinID)
-        print(owned)
-        return
+        print('Posiadane Coiny' + str(owned)+ '\n')
+        return owned
+        
 
 
     def checkTransaction(self, transaction):
+        coinID = int(transaction['coinID'])
+        owned = self.checkWallet(transaction['sender'])
+        if coinID in owned:
+            print('Transakcja zgodna')
+            return True
+        else:
+            print('Transakcja niezgodna')
+            return False
 
-        return True
+
     def addUser(self, user):
         self.userList.append(user)
