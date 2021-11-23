@@ -1,19 +1,17 @@
 import blockchainManager
 
-
-
-#Utworzenie użytkowników początkowych
+# Utworzenie użytkowników początkowych
 User1 = blockchainManager.Client('Adrian')
 User2 = blockchainManager.Client('Maria')
 User3 = blockchainManager.Client('Jan')
 User4 = blockchainManager.Client('Karol')
-userList=[]
+userList = []
 userList.append(User1)
 userList.append(User2)
 userList.append(User3)
 userList.append(User4)
 
-#Stworzenie blockchainu
+# Stworzenie blockchainu
 Blockchain = blockchainManager.blockchainManager(userList)
 
 while True:
@@ -37,7 +35,7 @@ while True:
             print(user.name + ', ', end='')
         print()
     elif option == '4':
-# Menu użytkownika
+        # Menu użytkownika
         userFlag = True
         selectedUser = input()
         user = Blockchain.userList[int(selectedUser)]
@@ -66,5 +64,3 @@ while True:
         exit(1)
     else:
         print("Wybierz poprawną opcję")
-
-
