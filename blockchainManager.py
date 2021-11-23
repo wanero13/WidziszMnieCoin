@@ -85,7 +85,7 @@ class blockchainManager:
         transaction = {
             'sender': sender,
             'recipient': recipient,
-            'amocoinID': coinID,
+            'coinID': coinID,
         }
         if self.checkTransaction(transaction):
             self.pending_transactions.append(transaction)
@@ -95,7 +95,7 @@ class blockchainManager:
         coin1 = {
             'sender': 'genessis',
             'recipient': self.userList[0].identity,
-            'coinID': self.coinCounter,
+            'coinID': 0,
         }
         coin2 = {
             'sender': 'genessis',
