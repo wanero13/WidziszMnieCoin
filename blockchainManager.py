@@ -11,7 +11,6 @@ from Crypto.Hash import SHA
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 
-
 class Client:
     def __init__(self, name):
         random = Crypto.Random.new().read
@@ -24,6 +23,10 @@ class Client:
     def identity(self):
         return binascii.hexlify(self._public_key.exportKey(format='DER')).decode('ascii')
 
+    def sign(self, message):
+        h = SHA.new(message.encode('utf8'))
+        return binascii.hexlify(self._signer.sign(h)).decode('ascii')
+
 
 class blockchainManager:
 
@@ -32,6 +35,8 @@ class blockchainManager:
         self.pending_transactions = []
         self.userList = userList
         self.generateCoins()
+
+        
 
         genessisBlock = {
             'id': len(self.chain) + 1,
@@ -44,7 +49,15 @@ class blockchainManager:
         self.pending_transactions = []
         toCode = json.dumps(genessisBlock, sort_keys=1).encode()
         self.sumHash = hashlib.sha3_512(toCode).hexdigest()
-        self.coinCounter = 4
+        self.coinCounter = 4 
+
+    # identyfikator chainManagera
+    random = Crypto.Random.new().read
+    private_key = RSA.generate(1024, random)
+    public_key = private_key.publickey()
+    signer = PKCS1_v1_5.new(private_key)
+    identityGenesis = binascii.hexlify(public_key.exportKey(format='DER')).decode('ascii')
+    
 
     def checkValid(self):
         prevHash = 0
@@ -63,7 +76,7 @@ class blockchainManager:
             if lastBlockHash != self.sumHash:
                 print('Wykryto brak spójności w bloku: ' + lastBlock)
             else:
-                print('Spójność zachowana!')
+                print('Spójność zachowana!'+'\n')
 
     def addBlock(self, proof):
         block = {
@@ -83,11 +96,12 @@ class blockchainManager:
     def last_block(self):
         return self.chain[-1]
 
-    def new_transaction(self, sender, recipient, coinID):
+    def new_transaction(self, sender, recipient, coinID, messege):
         transaction = {
-            'sender': sender,
-            'recipient': recipient,
+            'sender': sender.identity,
+            'recipient': recipient.identity,
             'coinID': coinID,
+            'signature': sender.sign(str(messege))
         }
         if self.checkTransaction(transaction):
             self.pending_transactions.append(transaction)
@@ -95,22 +109,22 @@ class blockchainManager:
 
     def generateCoins(self):
         coin1 = {
-            'sender': 'genessis',
+            'sender': self.identityGenesis,
             'recipient': self.userList[0].identity,
             'coinID': 0,
         }
         coin2 = {
-            'sender': 'genessis',
+            'sender': self.identityGenesis,
             'recipient': self.userList[0].identity,
             'coinID': 1,
         }
         coin3 = {
-            'sender': 'genessis',
+            'sender': self.identityGenesis,
             'recipient': self.userList[2].identity,
-            'coinID': 2
+            'coinID': 2,
         }
         coin4 = {
-            'sender': 'genessis',
+            'sender': self.identityGenesis,
             'recipient': self.userList[2].identity,
             'coinID': 3,
         }
@@ -131,7 +145,7 @@ class blockchainManager:
                     coinID = int(transaction['coinID'])
                     if coinID in owned:
                         owned.remove(coinID)
-        print('Posiadane Coiny' + str(owned) + '\n')
+        print('Posiadane Coiny ' + str(owned)+ '\n')
         return owned
 
     def checkTransaction(self, transaction):
@@ -142,7 +156,7 @@ class blockchainManager:
                 if ordered["coinID"] == coinID:
                     print('Transakcja z tym coinem została już zlecona do realizacji')
                     return False
-            print('Transakcja zgodna')
+            # print('Transakcja zgodna')
             return True
         else:
             print('Transakcja niezgodna')
@@ -150,3 +164,15 @@ class blockchainManager:
 
     def addUser(self, user):
         self.userList.append(user)
+
+    def validateCoin(self, coinID):
+        return True
+
+
+# Sprawdzenie podpisu z wiadomością
+def validateSignature(identity, message, signature):
+    pubkey = RSA.importKey(binascii.unhexlify(identity))
+    verifier = PKCS1_v1_5.new(pubkey)
+    h = SHA.new(message.encode('utf8'))
+    return verifier.verify(h, binascii.unhexlify(signature))
+
