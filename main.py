@@ -1,4 +1,7 @@
 import blockchainManager
+import binascii
+import Crypto.Random
+from Crypto.PublicKey import RSA
 
 # Utworzenie użytkowników początkowych
 User1 = blockchainManager.Client('Adrian')
@@ -68,20 +71,75 @@ Blockchain = blockchainManager.blockchainManager(userList)
 #     else:
 #         print("Wybierz poprawną opcję")
 
+# Dodanie bloku z 2 transakcjami
+Blockchain.new_transaction(User1, User2, 0)
+Blockchain.new_transaction(User3, User4, 2)
+Blockchain.addBlock('proof')
+
+# Wypisanie zawartosci portfeli po dodaniu bloku
+Blockchain.checkWallet(User1.identity)
+Blockchain.checkWallet(User2.identity)
+Blockchain.checkWallet(User3.identity)
+Blockchain.checkWallet(User4.identity)
+
+#Kolejny blok z tranzakcjami
+Blockchain.new_transaction(User4, User1, 2)
+Blockchain.new_transaction(User3, User2, 3)
+Blockchain.new_transaction(User1, User2, 1)
+Blockchain.addBlock('blok2')
+
+# Wypisanie zawartosci portfeli po dodaniu bloku
+Blockchain.checkWallet(User1.identity)
+Blockchain.checkWallet(User2.identity)
+Blockchain.checkWallet(User3.identity)
+Blockchain.checkWallet(User4.identity)
+
+# Sprawdzenie spójności
+Blockchain.checkValid()
+
+# Wygenerownie pary kluczy do testowania
+random = Crypto.Random.new().read
+fakepair = RSA.generate(1024, random)
+fakepub = binascii.hexlify(fakepair.publickey().exportKey(format='DER')).decode('ascii')
+
+#Dodanie tranzakcji i sprawdzenie podpisu
+Blockchain.new_transaction(User2, User3, 1)
+
+tr1 = Blockchain.pending_transactions[0]
+if Blockchain.validateSignature(User2.identity, tr1):
+    print('Tranakcja podpisana poprawnie')
+else:
+    print('Tranzakcja podpisana niepoprawnie')
+
+Blockchain.new_transaction(User2, User4, 0)
+tr2 = Blockchain.pending_transactions[1]
+tr2['sender'] = fakepub
+
+tr1 = Blockchain.pending_transactions[0]
+if Blockchain.validateSignature(User2.identity, tr2):
+    print('Tranakcja podpisana poprawnie')
+else:
+    print('Tranzakcja podpisana niepoprawnie')
 
 
-print(Blockchain.chain)
-Blockchain.new_transaction(User1, User2, 0, 'kasa')
-Blockchain.new_transaction(User1, User2, 1, 'siema')
-if blockchainManager.validateSignature(User1.identity, 'kasa' , User1.sign('kasa')):
-    if blockchainManager.validateSignature(User1.identity, 'siema' , User1.sign('siema')):
-        print('Wiadomość zgodna z podpisem')
-        Blockchain.addBlock("nowy")
+
+# Weryfikacja genesis
+genesis = Blockchain.chain[0]
+if Blockchain.checkBlock(genesis):
+    print('Blok genesis zawiera poprawnie podpisy')
+else:
+    print('Blok genesis zawiera niepoprawne podpisy')
+
+genesis['transactions'][0]['sender'] = str(fakepub)
+
+genesis = Blockchain.chain[0]
+if Blockchain.checkBlock(genesis):
+    print('Blok genesis zawiera poprawnie podpisy')
+else:
+    print('Blok genesis zawiera niepoprawne podpisy')
+
+# Ponowana walidacja spójności
+Blockchain.checkValid()
 
 
 
-if blockchainManager.validateSignature(User1.identity, 'podmieniona wiadomość' , User1.sign('kasa')):
-    print('Wiadomość zgodna z podpisem')
-    Blockchain.addBlock("nowy2")
-
-# Blockchain.checkValid()

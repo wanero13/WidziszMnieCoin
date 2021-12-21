@@ -58,13 +58,16 @@ class blockchainManager:
     signer = PKCS1_v1_5.new(private_key)
     identityGenesis = binascii.hexlify(public_key.exportKey(format='DER')).decode('ascii')
     
+    def sign(self, message):
+        h = SHA.new(message.encode('utf8'))
+        return binascii.hexlify(self.signer.sign(h)).decode('ascii')
 
     def checkValid(self):
         prevHash = 0
         flag = 0
         for block in self.chain:
             if block['prevHash'] != prevHash:
-                print('Wykryto brak spójności w bloku: ' + block)
+                print('Wykryto brak spójności w bloku: ' + str(block['id']))
                 flag = 1
                 break
             prevBytes = json.dumps(block, sort_keys=1).encode()
@@ -96,37 +99,43 @@ class blockchainManager:
     def last_block(self):
         return self.chain[-1]
 
-    def new_transaction(self, sender, recipient, coinID, messege):
+    def new_transaction(self, sender, recipient, coinID):
         transaction = {
             'sender': sender.identity,
             'recipient': recipient.identity,
             'coinID': coinID,
-            'signature': sender.sign(str(messege))
+            'signature': sender.sign(str(sender.identity) + str(recipient.identity) + str(coinID))
         }
+
         if self.checkTransaction(transaction):
             self.pending_transactions.append(transaction)
         return self.last_block['id'] + 1
 
     def generateCoins(self):
+        bcid = self.identityGenesis
         coin1 = {
-            'sender': self.identityGenesis,
+            'sender': bcid,
             'recipient': self.userList[0].identity,
             'coinID': 0,
+            'signature': self.sign(str(bcid) + str(self.userList[0].identity) + str(0))
         }
         coin2 = {
             'sender': self.identityGenesis,
             'recipient': self.userList[0].identity,
             'coinID': 1,
+            'signature': self.sign(str(bcid) + str(self.userList[0].identity) + str(1))
         }
         coin3 = {
             'sender': self.identityGenesis,
             'recipient': self.userList[2].identity,
             'coinID': 2,
+            'signature': self.sign(str(bcid) + str(self.userList[2].identity) + str(2))
         }
         coin4 = {
             'sender': self.identityGenesis,
             'recipient': self.userList[2].identity,
             'coinID': 3,
+            'signature': self.sign(str(bcid) + str(self.userList[2].identity) + str(3))
         }
         self.pending_transactions.append(coin1)
         self.pending_transactions.append(coin2)
@@ -170,9 +179,22 @@ class blockchainManager:
 
 
 # Sprawdzenie podpisu z wiadomością
-def validateSignature(identity, message, signature):
-    pubkey = RSA.importKey(binascii.unhexlify(identity))
-    verifier = PKCS1_v1_5.new(pubkey)
-    h = SHA.new(message.encode('utf8'))
-    return verifier.verify(h, binascii.unhexlify(signature))
+    def validateSignature(self, identity, transaction):
+        pubkey = RSA.importKey(binascii.unhexlify(identity))
+        verifier = PKCS1_v1_5.new(pubkey)
+        message = str(transaction['sender']) + str(transaction['recipient']) + str(transaction['coinID'])
+        h = SHA.new(message.encode('utf8'))
+        return verifier.verify(h, binascii.unhexlify(transaction['signature']))
 
+    def checkCurrentBlock(self):
+        for tr in self.pending_transactions:
+            if not self.validateSignature(tr['sender'], tr):
+                return False
+        return True
+
+
+    def checkBlock(self, block):
+        for tr in block['transactions']:
+            if not self.validateSignature(tr['sender'], tr):
+                return False
+        return True
