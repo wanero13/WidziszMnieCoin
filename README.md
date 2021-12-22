@@ -8,7 +8,7 @@ Projekt ma na celu naukę zagadnień związanych z kryptografią oraz technologi
 Należy uruchomić plik main.py np. poleceniem "python main.py" lub "python3 main.py"
 
 ## Jak korzystać?
-Korzystanie z programu odbywa się poprzez wpisanie w konsoli cyfry odpowiadającej odpowiedniemu poleceniu. Polecenia wyświetlają się w konsoli po uruchomieniu programu.
+W obecnej wersji program samodzielnie wykonuje sekwencje działań i nie posiada możlwości sterowania przez użytkownika.
 
 ## Menu Główne
 * Wciskając 1 i podając proof dodajemy nowy blok do naszego Blockchain
