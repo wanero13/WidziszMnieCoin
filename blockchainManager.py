@@ -29,21 +29,21 @@ class Client:
 
 
 class blockchainManager:
+    
 
     def __init__(self, userList):
         self.chain = []
         self.pending_transactions = []
         self.userList = userList
         self.generateCoins()
-
-        
+        self.guess_hash = ''
 
         genessisBlock = {
             'id': len(self.chain) + 1,
-            'prevHash': 0,
+            'prevHash': '000',
             'content': 'content',
             'transactions': self.pending_transactions,
-            'proof': 'proof',
+            'proof': 0,
         }
         self.chain.append(genessisBlock)
         self.pending_transactions = []
@@ -58,12 +58,13 @@ class blockchainManager:
     signer = PKCS1_v1_5.new(private_key)
     identityGenesis = binascii.hexlify(public_key.exportKey(format='DER')).decode('ascii')
     
+
     def sign(self, message):
         h = SHA.new(message.encode('utf8'))
         return binascii.hexlify(self.signer.sign(h)).decode('ascii')
 
     def checkValid(self):
-        prevHash = 0
+        prevHash = '000'
         flag = 0
         for block in self.chain:
             if block['prevHash'] != prevHash:
@@ -94,6 +95,7 @@ class blockchainManager:
         toCode = json.dumps(block, sort_keys=1).encode()
         self.sumHash = hashlib.sha3_512(toCode).hexdigest()
         print(self.chain)
+        print("Guess_hash: " +self.guess_hash)
 
     @property
     def last_block(self):
@@ -198,3 +200,23 @@ class blockchainManager:
             if not self.validateSignature(tr['sender'], tr):
                 return False
         return True
+    
+
+    def proof_of_work(self):
+        # last_block = self.chain[-1]
+        last_hash = self.sumHash
+        proof = 0
+        while self.valid_proof(self.pending_transactions, last_hash, proof) is False:
+            proof += 1
+        
+        return proof
+
+    MINING_DIFFICULTY = 4
+    def valid_proof(self, pending_transactions, last_hash, proof, difficulty=MINING_DIFFICULTY):
+        guess = (str(pending_transactions)+str(last_hash)+str(proof)).encode()
+        guess_hash = hashlib.sha256(guess).hexdigest()
+        if guess_hash[:difficulty] == '0'*difficulty:
+            self.guess_hash = guess_hash
+            return True
+        else: 
+            return False

@@ -2,6 +2,19 @@ import blockchainManager
 import binascii
 import Crypto.Random
 from Crypto.PublicKey import RSA
+# 
+import json
+import hashlib
+from time import *
+import binascii
+from matplotlib import pylab
+import pylab as pl
+
+import Crypto
+import Crypto.Random
+from Crypto.Hash import SHA
+from Crypto.PublicKey import RSA
+
 
 # Utworzenie użytkowników początkowych
 User1 = blockchainManager.Client('Adrian')
@@ -74,7 +87,7 @@ Blockchain = blockchainManager.blockchainManager(userList)
 # Dodanie bloku z 2 transakcjami
 Blockchain.new_transaction(User1, User2, 0)
 Blockchain.new_transaction(User3, User4, 2)
-Blockchain.addBlock('proof')
+Blockchain.addBlock(Blockchain.proof_of_work())
 
 # Wypisanie zawartosci portfeli po dodaniu bloku
 Blockchain.checkWallet(User1.identity)
@@ -86,7 +99,7 @@ Blockchain.checkWallet(User4.identity)
 Blockchain.new_transaction(User4, User1, 2)
 Blockchain.new_transaction(User3, User2, 3)
 Blockchain.new_transaction(User1, User2, 1)
-Blockchain.addBlock('blok2')
+Blockchain.addBlock(Blockchain.proof_of_work())
 
 # Wypisanie zawartosci portfeli po dodaniu bloku
 Blockchain.checkWallet(User1.identity)
@@ -98,48 +111,46 @@ Blockchain.checkWallet(User4.identity)
 Blockchain.checkValid()
 
 # Wygenerownie pary kluczy do testowania
-random = Crypto.Random.new().read
-fakepair = RSA.generate(1024, random)
-fakepub = binascii.hexlify(fakepair.publickey().exportKey(format='DER')).decode('ascii')
+# random = Crypto.Random.new().read
+# fakepair = RSA.generate(1024, random)
+# fakepub = binascii.hexlify(fakepair.publickey().exportKey(format='DER')).decode('ascii')
 
 #Dodanie tranzakcji i sprawdzenie podpisu
-Blockchain.new_transaction(User2, User3, 1)
+# Blockchain.new_transaction(User2, User3, 1)
 
-tr1 = Blockchain.pending_transactions[0]
-if Blockchain.validateSignature(User2.identity, tr1):
-    print('Tranakcja podpisana poprawnie')
-else:
-    print('Tranzakcja podpisana niepoprawnie')
+# tr1 = Blockchain.pending_transactions[0]
+# if Blockchain.validateSignature(User2.identity, tr1):
+#     print('Tranakcja podpisana poprawnie')
+# else:
+#     print('Tranzakcja podpisana niepoprawnie')
 
-Blockchain.new_transaction(User2, User4, 0)
-tr2 = Blockchain.pending_transactions[1]
-tr2['sender'] = fakepub
+# Blockchain.new_transaction(User2, User4, 0)
+# tr2 = Blockchain.pending_transactions[1]
+# tr2['sender'] = fakepub
 
-tr1 = Blockchain.pending_transactions[0]
-if Blockchain.validateSignature(User2.identity, tr2):
-    print('Tranakcja podpisana poprawnie')
-else:
-    print('Tranzakcja podpisana niepoprawnie')
+# tr1 = Blockchain.pending_transactions[0]
+# if Blockchain.validateSignature(User2.identity, tr2):
+#     print('Tranakcja podpisana poprawnie')
+# else:
+#     print('Tranzakcja podpisana niepoprawnie')
 
 
 
 # Weryfikacja genesis
-genesis = Blockchain.chain[0]
-if Blockchain.checkBlock(genesis):
-    print('Blok genesis zawiera poprawnie podpisy')
-else:
-    print('Blok genesis zawiera niepoprawne podpisy')
+# genesis = Blockchain.chain[0]
+# if Blockchain.checkBlock(genesis):
+#     print('Blok genesis zawiera poprawnie podpisy')
+# else:
+#     print('Blok genesis zawiera niepoprawne podpisy')
 
-genesis['transactions'][0]['sender'] = str(fakepub)
+# genesis['transactions'][0]['sender'] = str(fakepub)
 
-genesis = Blockchain.chain[0]
-if Blockchain.checkBlock(genesis):
-    print('Blok genesis zawiera poprawnie podpisy')
-else:
-    print('Blok genesis zawiera niepoprawne podpisy')
+# genesis = Blockchain.chain[0]
+# if Blockchain.checkBlock(genesis):
+#     print('Blok genesis zawiera poprawnie podpisy')
+# else:
+#     print('Blok genesis zawiera niepoprawne podpisy')
 
 # Ponowana walidacja spójności
-Blockchain.checkValid()
-
-
+# Blockchain.checkValid()
 
