@@ -11,32 +11,19 @@ from Crypto.Hash import SHA
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 
-class Client:
-    def __init__(self, name):
-        random = Crypto.Random.new().read
-        self._private_key = RSA.generate(1024, random)
-        self._public_key = self._private_key.publickey()
-        self._signer = PKCS1_v1_5.new(self._private_key)
-        self.name = name
-
-    @property
-    def identity(self):
-        return binascii.hexlify(self._public_key.exportKey(format='DER')).decode('ascii')
-
-    def sign(self, message):
-        h = SHA.new(message.encode('utf8'))
-        return binascii.hexlify(self._signer.sign(h)).decode('ascii')
-
-
 class blockchainManager:
 
-    def __init__(self, userList):
+    def __init__(self):
+        self.coinCounter = 0
+        self.sumHash = None
         self.chain = []
         self.pending_transactions = []
+        self.userList = None
+
+
+    def initiateBlockChain(self, userList):
         self.userList = userList
         self.generateCoins()
-
-        
 
         genessisBlock = {
             'id': len(self.chain) + 1,
@@ -49,9 +36,9 @@ class blockchainManager:
         self.pending_transactions = []
         toCode = json.dumps(genessisBlock, sort_keys=1).encode()
         self.sumHash = hashlib.sha3_512(toCode).hexdigest()
-        self.coinCounter = 4 
+        self.coinCounter = 4
 
-    # identyfikator chainManagera
+        # identyfikator chainManagera
     random = Crypto.Random.new().read
     private_key = RSA.generate(1024, random)
     public_key = private_key.publickey()
