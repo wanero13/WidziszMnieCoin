@@ -21,11 +21,13 @@ class blockchainManager:
         self.private_key = None
         self.public_key = None
         self.coinCounter = 0
-        self.sumHash = None
+        self.sumHash = 0
         self.chain = []
         self.pending_transactions = []
         self.userList = None
         self.proof = randrange(10000)
+        self.last_correct = 0
+        self.coinCounter
 
     def initiateBlockChain(self, userList, priv, pub, signer, identityG):
         # identyfikator chainManagera
@@ -37,13 +39,17 @@ class blockchainManager:
         self.userList = userList
         self.generateCoins()
         self.guess_hash = ''
-
+        self.last_hash=self.sumHash
+        guess = (str(self.pending_transactions) + str(self.last_hash) + str(self.last_correct)).encode()
+        guess_hash = hashlib.sha3_512(guess).hexdigest()
         genessisBlock = {
             'id': len(self.chain) + 1,
+            'miner': self.identityGenesis,
             'prevHash': '000',
-            'content': 'content',
+            'timetamp': strftime("%d %b %Y %H:%M:%S", gmtime()),
             'transactions': self.pending_transactions,
             'proof': 0,
+            'proofofwork': guess_hash
         }
         self.chain.append(genessisBlock)
         self.pending_transactions = []
@@ -80,6 +86,7 @@ class blockchainManager:
                 print('Spójność zachowana!' + '\n')
 
     def proposeBlock(self, proof, userID):
+        self.gen_reward(self.identityGenesis, userID, self.coinCounter)
         block = {
             'id': len(self.chain) + 1,
             'miner': userID,
@@ -87,10 +94,12 @@ class blockchainManager:
             'timetamp': strftime("%d %b %Y %H:%M:%S", gmtime()),
             'transactions': self.pending_transactions,
             'proof': proof,
+            'proofofwork': self.guess_hash
         }
         return block
 
     def addBlock(self, block):
+        self.coinCounter = self.coinCounter + 1
         self.pending_transactions = []
         self.chain.append(block)
         toCode = json.dumps(block, sort_keys=1).encode()
@@ -101,6 +110,17 @@ class blockchainManager:
     @property
     def last_block(self):
         return self.chain[-1]
+
+    def gen_reward(self, sender, recipient, coinID):
+        transaction = {
+            'sender': sender,
+            'recipient': recipient,
+            'coinID': coinID,
+            'signature': self.sign(str(self.identityGenesis) + str(recipient) + str(coinID))
+        }
+
+        self.pending_transactions.append(transaction)
+        return self.last_block['id'] + 1
 
     def new_transaction(self, sender, recipient, coinID):
         transaction = {
@@ -203,11 +223,13 @@ class blockchainManager:
     def proof_of_work(self):
         # last_block = self.chain[-1]
         last_hash = self.sumHash
-        if not self.valid_proof(self.pending_transactions, last_hash, self.proof):
+        guessed = self.valid_proof(self.pending_transactions, last_hash, self.proof)
+        if guessed == -1:
             self.proof += 1
             return -1
         else:
             correcproof = self.proof
+            self.last_correct=self.proof
             self.proof = randrange(10000)
             return correcproof
 
@@ -218,7 +240,8 @@ class blockchainManager:
         guess_hash = hashlib.sha3_512(guess).hexdigest()
         if guess_hash[:difficulty] == '0' * difficulty:
             self.guess_hash = guess_hash
-            return True 
+            print(guess_hash)
+            return guess_hash
         else:
-            return False
+            return -1
 
