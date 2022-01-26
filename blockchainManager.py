@@ -10,6 +10,7 @@ import Crypto.Random
 from Crypto.Hash import SHA
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
+from random import randrange
 
 class blockchainManager:
     
@@ -20,6 +21,7 @@ class blockchainManager:
         self.chain = []
         self.pending_transactions = []
         self.userList = None
+        self.proof = randrange(10000)
 
 
     def initiateBlockChain(self, userList):
@@ -52,6 +54,11 @@ class blockchainManager:
         h = SHA.new(message.encode('utf8'))
         return binascii.hexlify(self.signer.sign(h)).decode('ascii')
 
+    def updateTransactions(self, transactions):
+        for tr in transactions:
+            if self.checkTransaction(tr):
+                self.pending_transactions.append(tr)
+
     def checkValid(self):
         prevHash = '000'
         flag = 0
@@ -71,7 +78,7 @@ class blockchainManager:
             else:
                 print('Spójność zachowana!'+'\n')
 
-    def addBlock(self, proof):
+    def proposeBlock(self, proof):
         block = {
             'id': len(self.chain) + 1,
             'prevHash': self.sumHash,
@@ -79,6 +86,9 @@ class blockchainManager:
             'transactions': self.pending_transactions,
             'proof': proof,
         }
+        return block
+
+    def addBlock(self, block):
         self.pending_transactions = []
         self.chain.append(block)
         toCode = json.dumps(block, sort_keys=1).encode()
@@ -194,11 +204,13 @@ class blockchainManager:
     def proof_of_work(self):
         # last_block = self.chain[-1]
         last_hash = self.sumHash
-        proof = 0
-        while self.valid_proof(self.pending_transactions, last_hash, proof) is False:
-            proof += 1
-        
-        return proof
+        if not self.valid_proof(self.pending_transactions, last_hash, self.proof):
+            self.proof += 1
+            return -1
+        else:
+            correcproof = self.proof
+            self.proof = randrange(10000)
+            return correcproof
 
     MINING_DIFFICULTY = 4
     def valid_proof(self, pending_transactions, last_hash, proof, difficulty=MINING_DIFFICULTY):
