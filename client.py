@@ -30,14 +30,14 @@ class Client:
         h = SHA.new(message.encode('utf8'))
         return binascii.hexlify(self._signer.sign(h)).decode('ascii')
 
-    def initiateBlockchain(self, userList):
-        return self.bcm.initiateBlockChain(userList)
+    def initiateBlockchain(self, userList, priv,pub, sign, identityG):
+        return self.bcm.initiateBlockChain(userList, priv,pub, sign, identityG)
 
     def proofofwork(self):
         return self.bcm.proof_of_work()
 
     def proposeBlock(self, proof):
-        return self.bcm.proposeBlock(proof)
+        return self.bcm.proposeBlock(proof, self.name)
 
     def addBlock(self, block):
         return self.bcm.addBlock(block=block)
@@ -47,3 +47,9 @@ class Client:
 
     def addTransaction(self, sender, recipient, coinID):
         return self.bcm.new_transaction(sender=sender, recipient=recipient, coinID=coinID)
+
+    def validateBlock(self, block):
+        for tr in block['transactions']:
+            if not self.bcm.checkTransaction(tr):
+                return False
+        return self.bcm.checkBlock(block)

@@ -12,10 +12,14 @@ from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 from random import randrange
 
+
 class blockchainManager:
-    
 
     def __init__(self):
+        self.identityGenesis = None
+        self.signer = None
+        self.private_key = None
+        self.public_key = None
         self.coinCounter = 0
         self.sumHash = None
         self.chain = []
@@ -23,8 +27,13 @@ class blockchainManager:
         self.userList = None
         self.proof = randrange(10000)
 
+    def initiateBlockChain(self, userList, priv, pub, signer, identityG):
+        # identyfikator chainManagera
+        self.private_key = priv
+        self.public_key = pub
+        self.signer = signer
+        self.identityGenesis = identityG
 
-    def initiateBlockChain(self, userList):
         self.userList = userList
         self.generateCoins()
         self.guess_hash = ''
@@ -41,14 +50,6 @@ class blockchainManager:
         toCode = json.dumps(genessisBlock, sort_keys=1).encode()
         self.sumHash = hashlib.sha3_512(toCode).hexdigest()
         self.coinCounter = 4
-
-        # identyfikator chainManagera
-    random = Crypto.Random.new().read
-    private_key = RSA.generate(1024, random)
-    public_key = private_key.publickey()
-    signer = PKCS1_v1_5.new(private_key)
-    identityGenesis = binascii.hexlify(public_key.exportKey(format='DER')).decode('ascii')
-    
 
     def sign(self, message):
         h = SHA.new(message.encode('utf8'))
@@ -76,11 +77,12 @@ class blockchainManager:
             if lastBlockHash != self.sumHash:
                 print('Wykryto brak spójności w bloku: ' + lastBlock)
             else:
-                print('Spójność zachowana!'+'\n')
+                print('Spójność zachowana!' + '\n')
 
-    def proposeBlock(self, proof):
+    def proposeBlock(self, proof, userID):
         block = {
             'id': len(self.chain) + 1,
+            'miner': userID,
             'prevHash': self.sumHash,
             'timetamp': strftime("%d %b %Y %H:%M:%S", gmtime()),
             'transactions': self.pending_transactions,
@@ -94,7 +96,7 @@ class blockchainManager:
         toCode = json.dumps(block, sort_keys=1).encode()
         self.sumHash = hashlib.sha3_512(toCode).hexdigest()
         print(self.chain)
-        print("Guess_hash: " +self.guess_hash)
+        print("Guess_hash: " + self.guess_hash)
 
     @property
     def last_block(self):
@@ -155,7 +157,7 @@ class blockchainManager:
                     coinID = int(transaction['coinID'])
                     if coinID in owned:
                         owned.remove(coinID)
-        print('Posiadane Coiny ' + str(owned)+ '\n')
+        print('Posiadane Coiny ' + str(owned) + '\n')
         return owned
 
     def checkTransaction(self, transaction):
@@ -178,8 +180,7 @@ class blockchainManager:
     def validateCoin(self, coinID):
         return True
 
-
-# Sprawdzenie podpisu z wiadomością
+    # Sprawdzenie podpisu z wiadomością
     def validateSignature(self, identity, transaction):
         pubkey = RSA.importKey(binascii.unhexlify(identity))
         verifier = PKCS1_v1_5.new(pubkey)
@@ -193,13 +194,11 @@ class blockchainManager:
                 return False
         return True
 
-
     def checkBlock(self, block):
         for tr in block['transactions']:
             if not self.validateSignature(tr['sender'], tr):
                 return False
         return True
-    
 
     def proof_of_work(self):
         # last_block = self.chain[-1]
@@ -213,11 +212,12 @@ class blockchainManager:
             return correcproof
 
     MINING_DIFFICULTY = 4
+
     def valid_proof(self, pending_transactions, last_hash, proof, difficulty=MINING_DIFFICULTY):
-        guess = (str(pending_transactions)+str(last_hash)+str(proof)).encode()
+        guess = (str(pending_transactions) + str(last_hash) + str(proof)).encode()
         guess_hash = hashlib.sha256(guess).hexdigest()
-        if guess_hash[:difficulty] == '0'*difficulty:
+        if guess_hash[:difficulty] == '0' * difficulty:
             self.guess_hash = guess_hash
             return True
-        else: 
+        else:
             return False

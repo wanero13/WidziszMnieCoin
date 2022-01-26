@@ -8,15 +8,22 @@ from threading import Thread, Event
 import time
 import json
 import hashlib
-from time import *
 import binascii
 from matplotlib import pylab
 import pylab as pl
-
+from Crypto.Hash import SHA
+from Crypto.PublicKey import RSA
+from Crypto.Signature import PKCS1_v1_5
 import Crypto
 import Crypto.Random
 from Crypto.Hash import SHA
 from Crypto.PublicKey import RSA
+
+random = Crypto.Random.new().read
+priv = RSA.generate(1024, random)
+pub = priv.publickey()
+sign = PKCS1_v1_5.new(priv)
+identityGenesis = binascii.hexlify(pub.exportKey(format='DER')).decode('ascii')
 
 # Utworzenie użytkowników początkowych
 User1 = Client('Adrian')
@@ -32,76 +39,80 @@ userList.append(User4)
 
 # Stworzenie blockchainu
 
-User1.initiateBlockchain(userList)
-User2.initiateBlockchain(userList)
-User3.initiateBlockchain(userList)
-User4.initiateBlockchain(userList)
+User1.initiateBlockchain(userList, priv, pub, sign, identityGenesis)
+User2.initiateBlockchain(userList, priv, pub, sign, identityGenesis)
+User3.initiateBlockchain(userList, priv, pub, sign, identityGenesis)
+User4.initiateBlockchain(userList, priv, pub, sign, identityGenesis)
 
 flag = True
 proposed_block = None
 
 
-def threadLoop1():
+def threadLoop1(b):
     global flag
     global proposed_block
     while flag:
         b = User1.proofofwork()
         if b != -1:
             flag = False
-    if b != -1:
+    if b == -1:
         return
     proposed_block = User1.proposeBlock(b)
 
 
-def threadLoop2():
+def threadLoop2(b):
     global flag
     global proposed_block
     while flag:
         b = User2.proofofwork()
         if b != -1:
             flag = False
-    if b != -1:
+    if b == -1:
         return
     proposed_block = User2.proposeBlock(b)
 
 
-def threadLoop3():
+def threadLoop3(b):
     global flag
     global proposed_block
     while flag:
         b = User3.proofofwork()
         if b != -1:
             flag = False
-    if b != -1:
+    if b == -1:
         return
     proposed_block = User3.proposeBlock(b)
 
 
-def threadLoop4():
+def threadLoop4(b):
     global flag
     global proposed_block
     while flag:
         b = User4.proofofwork()
         if b != -1:
             flag = False
-    if b != -1:
+    if b == -1:
         return
     proposed_block = User4.proposeBlock(b)
 
 
-thread1 = Thread(target=threadLoop1)
-thread2 = Thread(target=threadLoop2)
-thread3 = Thread(target=threadLoop3)
-thread4 = Thread(target=threadLoop4)
+thread1 = Thread(target=threadLoop1, args=(-1,))
+thread2 = Thread(target=threadLoop2, args=(-1,))
+thread3 = Thread(target=threadLoop3, args=(-1,))
+thread4 = Thread(target=threadLoop4, args=(-1,))
 
-thread1.start()
-thread2.start()
-thread3.start()
-thread4.start()
+def maketurn():
+    thread1.start()
+    thread2.start()
+    thread3.start()
+    thread4.start()
 
-thread1.join()
-thread2.join()
-thread3.join()
-thread4.join()
+    thread1.join()
+    thread2.join()
+    thread3.join()
+    thread4.join()
 
-print(proposed_block)
+    print(proposed_block)
+
+maketurn()
+
