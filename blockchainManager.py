@@ -263,7 +263,7 @@ class blockchainManager:
             self.proof = randrange(10000)
             return correcproof
 
-    MINING_DIFFICULTY = 4
+    MINING_DIFFICULTY = 5
 
     def valid_proof(self, pending_transactions, last_hash, proof, difficulty=MINING_DIFFICULTY):
         guess = (str(last_hash) + str(proof)).encode()

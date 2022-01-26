@@ -61,7 +61,12 @@ tr2 = {
             'coinID': 1,
             'signature': User1.sign(str(User1.identity) + str(User2.identity) + str(1))
         }
-
+tr3 = {
+            'sender': User1.identity,
+            'recipient': User2.identity,
+            'coinID': 3,
+            'signature': User1.sign(str(User1.identity) + str(User2.identity) + str(3))
+        }
 
 
 
@@ -143,6 +148,7 @@ def maketurn():
     #propose transactions
     transaction_list.append(tr1)
     transaction_list.append(tr2)
+    # transaction_list.append(tr3)
     #update transactions
     User1.updateTransactions(transaction_list)
     User2.updateTransactions(transaction_list)
@@ -169,7 +175,7 @@ def maketurn():
         User4.addBlock(proposed_block)
 
     User1.printOwnerMap()
-
+    # User1.printChain()
     User1.clear()
     User2.clear()
     User3.clear()
