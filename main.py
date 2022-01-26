@@ -159,9 +159,25 @@ def maketurn():
     thread3.join()
     thread4.join()
     #check block validity
+    if (User1.validateBlock(proposed_block)
+        and User2.validateBlock(proposed_block)
+        and User3.validateBlock(proposed_block)
+        and User4.validateBlock(proposed_block)):
+        User1.addBlock(proposed_block)
+        User2.addBlock(proposed_block)
+        User3.addBlock(proposed_block)
+        User4.addBlock(proposed_block)
 
+    User1.printOwnerMap()
+
+    User1.clear()
+    User2.clear()
+    User3.clear()
+    User4.clear()
     #add block if valid
-    print(proposed_block)
+
+
+
 
 maketurn()
 

@@ -27,7 +27,8 @@ class blockchainManager:
         self.userList = None
         self.proof = randrange(10000)
         self.last_correct = 0
-        self.coinCounter
+        self.coinCounter=0
+        self.coinCounter=0
 
     def initiateBlockChain(self, userList, priv, pub, signer, identityG):
         # identyfikator chainManagera
@@ -39,8 +40,8 @@ class blockchainManager:
         self.userList = userList
         self.generateCoins()
         self.guess_hash = ''
-        self.last_hash=self.sumHash
-        guess = (str(self.pending_transactions) + str(self.last_hash) + str(self.last_correct)).encode()
+        self.last_hash = self.sumHash
+        guess = (str(self.last_hash) + str(self.last_correct)).encode()
         guess_hash = hashlib.sha3_512(guess).hexdigest()
         genessisBlock = {
             'id': len(self.chain) + 1,
@@ -105,7 +106,6 @@ class blockchainManager:
         toCode = json.dumps(block, sort_keys=1).encode()
         self.sumHash = hashlib.sha3_512(toCode).hexdigest()
         # print(self.chain)
-        print("Guess_hash: " + self.guess_hash)
 
     @property
     def last_block(self):
@@ -180,6 +180,36 @@ class blockchainManager:
         # print('Posiadane Coiny ' + str(owned) + '\n')
         return owned
 
+    def checkBlockTransaction(self, newblock):
+        guess = (str(newblock['prevHash']) + str(newblock['proof'])).encode()
+        guess_hash = hashlib.sha3_512(guess).hexdigest()
+        if newblock['proofofwork'] != guess_hash:
+            return False
+        ownerMap = {self.userList[0].identity: [],
+                    self.userList[1].identity: [],
+                    self.userList[2].identity: [],
+                    self.userList[3].identity: [], }
+
+        for block in self.chain:
+            for transaction in block['transactions']:
+                if transaction['sender'] == self.identityGenesis:
+                    ownerMap.get(transaction['recipient']).append(transaction['coinID'])
+                else:
+                    ownerMap.get(transaction['sender']).remove(transaction['coinID'])
+                    ownerMap.get(transaction['recipient']).append(transaction['coinID'])
+
+        for transaction in newblock['transactions']:
+            if transaction['sender'] == str(self.identityGenesis):
+                continue
+            else:
+                if transaction['coinID'] not in ownerMap.get(transaction['sender']):
+                    return False
+                else:
+                    ownerMap.get(transaction['sender']).remove(transaction['coinID'])
+                    ownerMap.get(transaction['recipient']).append(transaction['coinID'])
+
+        return True
+
     def checkTransaction(self, transaction):
         coinID = int(transaction['coinID'])
         owned = self.checkWallet(transaction['sender'])
@@ -229,14 +259,14 @@ class blockchainManager:
             return -1
         else:
             correcproof = self.proof
-            self.last_correct=self.proof
+            self.last_correct = self.proof
             self.proof = randrange(10000)
             return correcproof
 
     MINING_DIFFICULTY = 4
 
     def valid_proof(self, pending_transactions, last_hash, proof, difficulty=MINING_DIFFICULTY):
-        guess = (str(pending_transactions) + str(last_hash) + str(proof)).encode()
+        guess = (str(last_hash) + str(proof)).encode()
         guess_hash = hashlib.sha3_512(guess).hexdigest()
         if guess_hash[:difficulty] == '0' * difficulty:
             self.guess_hash = guess_hash
@@ -245,3 +275,20 @@ class blockchainManager:
         else:
             return -1
 
+    def clear(self):
+        self.pending_transactions=[]
+
+    def printOwnerMap(self):
+        ownerMap = {self.userList[0].identity: [],
+                    self.userList[1].identity: [],
+                    self.userList[2].identity: [],
+                    self.userList[3].identity: [], }
+
+        for block in self.chain:
+            for transaction in block['transactions']:
+                if transaction['sender'] == self.identityGenesis:
+                    ownerMap.get(transaction['recipient']).append(transaction['coinID'])
+                else:
+                    ownerMap.get(transaction['sender']).remove(transaction['coinID'])
+                    ownerMap.get(transaction['recipient']).append(transaction['coinID'])
+        print(ownerMap)

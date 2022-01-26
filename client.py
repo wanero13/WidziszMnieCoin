@@ -37,7 +37,7 @@ class Client:
         return self.bcm.proof_of_work()
 
     def proposeBlock(self, proof):
-        return self.bcm.proposeBlock(proof, self.name)
+        return self.bcm.proposeBlock(proof, self.identity)
 
     def addBlock(self, block):
         return self.bcm.addBlock(block=block)
@@ -49,11 +49,23 @@ class Client:
         return self.bcm.new_transaction(sender=sender, recipient=recipient, coinID=coinID)
 
     def validateBlock(self, block):
-        for tr in block['transactions']:
-            if not self.bcm.checkTransaction(tr):
-                return False
-        return self.bcm.checkBlock(block)
+        if not self.bcm.checkBlock(block):
+            print('Signatures Failed')
+            return False
+        if not self.bcm.checkBlockTransaction(block):
+            print('Validation Failed')
+            return False
+        return True
 
     
     def valid_proof(self, pending_transactions, last_hash, proof):
         return self.bcm.valid_proof(pending_transactions=pending_transactions, last_hash=last_hash, proof=proof)
+
+    def clear(self):
+        self.bcm.clear()
+
+    def printChain(self):
+        print(self.bcm.chain)
+
+    def printOwnerMap(self):
+        self.bcm.printOwnerMap()
