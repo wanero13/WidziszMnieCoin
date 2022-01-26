@@ -46,53 +46,105 @@ User4.initiateBlockchain(userList, priv, pub, sign, identityGenesis)
 
 flag = True
 proposed_block = None
+transaction_list = []
+proof = 0
+
+tr1 = {
+            'sender': User1.identity,
+            'recipient': User2.identity,
+            'coinID': 0,
+            'signature': User1.sign(str(User1.identity) + str(User2.identity) + str(0))
+        }
+tr2 = {
+            'sender': User1.identity,
+            'recipient': User2.identity,
+            'coinID': 1,
+            'signature': User1.sign(str(User1.identity) + str(User2.identity) + str(1))
+        }
+
+
+
 
 
 def threadLoop1(b):
+    transaction_list.append(tr1)
+    transaction_list.append(tr2)
+    User1.updateTransactions(transaction_list)
     global flag
     global proposed_block
+    global proof
     while flag:
         b = User1.proofofwork()
         if b != -1:
+            proof = b
+            print("wykopał User 1")
             flag = False
     if b == -1:
-        return
+        if User1.validateBlock(proposed_block) and User1.valid_proof(transaction_list, User1.bcm.sumHash, proof):
+            User1.addBlock(proposed_block)
+            return print("user1 potwierdza")
+        else:
+            return print("bład user 1")
     proposed_block = User1.proposeBlock(b)
 
 
 def threadLoop2(b):
+    User2.updateTransactions(transaction_list)
     global flag
     global proposed_block
+    global proof
     while flag:
         b = User2.proofofwork()
         if b != -1:
+            proof = b
+            print("wykopał User 2")
             flag = False
     if b == -1:
-        return
+        if User2.validateBlock(proposed_block) and User2.valid_proof(transaction_list, User2.bcm.sumHash, proof):
+            User2.addBlock(proposed_block)
+            return print("user2 potwierdza")
+        else:
+            return print("bład user 2")
     proposed_block = User2.proposeBlock(b)
 
 
 def threadLoop3(b):
+    User3.updateTransactions(transaction_list)
     global flag
     global proposed_block
+    global proof
     while flag:
         b = User3.proofofwork()
         if b != -1:
+            proof = b
+            print("wykopał User 3")
             flag = False
     if b == -1:
-        return
+        if User3.validateBlock(proposed_block) and User3.valid_proof(transaction_list, User3.bcm.sumHash, proof):
+            User3.addBlock(proposed_block)
+            return print("user3 potwierdza")
+        else:
+            return print("bład user 3")
     proposed_block = User3.proposeBlock(b)
 
 
 def threadLoop4(b):
+    User4.updateTransactions(transaction_list)
     global flag
     global proposed_block
+    global proof
     while flag:
         b = User4.proofofwork()
         if b != -1:
+            proof = b
+            print("wykopał User 4")
             flag = False
     if b == -1:
-        return
+        if User4.validateBlock(proposed_block) and User4.valid_proof(transaction_list, User4.bcm.sumHash, proof):
+            User4.addBlock(proposed_block)
+            return print("user4 potwierdza")
+        else:
+            return print("bład user 4")    
     proposed_block = User4.proposeBlock(b)
 
 

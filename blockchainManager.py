@@ -95,7 +95,7 @@ class blockchainManager:
         self.chain.append(block)
         toCode = json.dumps(block, sort_keys=1).encode()
         self.sumHash = hashlib.sha3_512(toCode).hexdigest()
-        print(self.chain)
+        # print(self.chain)
         print("Guess_hash: " + self.guess_hash)
 
     @property
@@ -157,7 +157,7 @@ class blockchainManager:
                     coinID = int(transaction['coinID'])
                     if coinID in owned:
                         owned.remove(coinID)
-        print('Posiadane Coiny ' + str(owned) + '\n')
+        # print('Posiadane Coiny ' + str(owned) + '\n')
         return owned
 
     def checkTransaction(self, transaction):
@@ -177,8 +177,8 @@ class blockchainManager:
     def addUser(self, user):
         self.userList.append(user)
 
-    def validateCoin(self, coinID):
-        return True
+    # def validateCoin(self, coinID):
+    #     return True
 
     # Sprawdzenie podpisu z wiadomością
     def validateSignature(self, identity, transaction):
@@ -215,9 +215,10 @@ class blockchainManager:
 
     def valid_proof(self, pending_transactions, last_hash, proof, difficulty=MINING_DIFFICULTY):
         guess = (str(pending_transactions) + str(last_hash) + str(proof)).encode()
-        guess_hash = hashlib.sha256(guess).hexdigest()
+        guess_hash = hashlib.sha3_512(guess).hexdigest()
         if guess_hash[:difficulty] == '0' * difficulty:
             self.guess_hash = guess_hash
-            return True
+            return True 
         else:
             return False
+

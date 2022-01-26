@@ -53,3 +53,7 @@ class Client:
             if not self.bcm.checkTransaction(tr):
                 return False
         return self.bcm.checkBlock(block)
+
+    
+    def valid_proof(self, pending_transactions, last_hash, proof):
+        return self.bcm.valid_proof(pending_transactions=pending_transactions, last_hash=last_hash, proof=proof)
